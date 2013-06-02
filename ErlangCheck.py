@@ -20,7 +20,7 @@ from pybeam import BeamFile
 class ErlangCheck(AbstractCheck.AbstractFilesCheck):
     def __init__(self):
         AbstractCheck.AbstractFilesCheck.__init__(self, "CheckErlang", ".*?\.beam$")
-        build_dir = Config.getOption("Erlang.BuildDir", "^/home/abuild/.*")
+        build_dir = rpm.expandMacro("%_builddir") 
         self.source_re = re.compile(build_dir)
 
     def check_file(self, pkg, filename):
