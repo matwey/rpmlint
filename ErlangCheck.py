@@ -15,7 +15,10 @@ import commands
 import Config
 import stat
 
-from pybeam import BeamFile
+try:
+	from pybeam import BeamFile
+except:
+	BeamFile = None
 
 class ErlangCheck(AbstractCheck.AbstractFilesCheck):
     def __init__(self):
@@ -30,10 +33,22 @@ class ErlangCheck(AbstractCheck.AbstractFilesCheck):
         if not self.source_re.match(beam.compileinfo['source'].value):
             printWarning(pkg, "beam-was-not-recompiled", filename, beam.compileinfo['source'].value)
 
-check=ErlangCheck()
+class DummyErlangCheck(AbstractCheck.AbstractFilesCheck):
+    def __init__(self):
+        AbstractCheck.AbstractFilesCheck.__init__(self, "ErlangCheck", ".*?\.beam$")
+
+    def check_file(self, pkg, filename):
+        printWarning(pkg, "beam-found-but-no-pybeam-installed", filename)
+
+if BeamFile:
+	check=ErlangCheck()
+else:
+	check=DummyErlangCheck()
 
 if Config.info:
     addDetails(
+'beam-found-but-no-pybeam-installed',
+"It would be possible to do some erlang-specific diagnostic, If python-pybeam were installed.",
 'beam-compiled-without-debug_info',
 "Your beam file indicates that it doesn't contain debug_info. Please, make sure that you compile with +debug_info.",
 'beam-was-not-recompiled',
